@@ -44,19 +44,19 @@ spring:
     gateway:
       routes:
         - id: order
-          uri: http://order:8080
+          uri: http://user11-order:8080
           predicates:
             - Path=/orders/** 
         - id: delivery
-          uri: http://delivery:8080
+          uri: http://user11-delivery:8080
           predicates:
             - Path=/deliveries/** 
         - id: product
-          uri: http://product:8080
+          uri: http://user11-product:8080
           predicates:
             - Path=/inventories/** 
         - id: frontend
-          uri: http://frontend:8080
+          uri: http://user11-frontend:8080
           predicates:
             - Path=/**
       globalcors:
