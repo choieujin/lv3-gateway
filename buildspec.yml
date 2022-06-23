@@ -75,6 +75,10 @@ phases:
                 containers:
                   - name: $_PROJECT_NAME
                     image: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$_PROJECT_NAME:$CODEBUILD_RESOLVED_SOURCE_VERSION
+                    resources:
+                      requests:
+                        memory: "64Mi"
+                        cpu: "250m"                    
                     ports:
                       - containerPort: 8080
                     readinessProbe:
