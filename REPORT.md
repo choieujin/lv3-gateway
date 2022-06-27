@@ -66,11 +66,12 @@
                    
                         
 - app deploy
-            - gateway loadbalancer 설정    
-                ![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/47122d7a-10de-4327-8a22-496d9d90cddb/Untitled.png)
-            - gateway routing svc 경로 확인
-                **[src](https://github.com/choieujin/lv3-gateway/tree/main/src)/[main](https://github.com/choieujin/lv3-gateway/tree/main/src/main)/[resources](https://github.com/choieujin/lv3-gateway/tree/main/src/main/resources)/application.yml**
-                ![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/081c731f-db5c-43d5-85a5-b4da0827fd13/Untitled.png)
+  - gateway loadbalancer 설정    
+    ![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/47122d7a-10de-4327-8a22-496d9d90cddb/Untitled.png)
+  - gateway routing svc 경로 확인
+    **[src](https://github.com/choieujin/lv3-gateway/tree/main/src)/[main](https://github.com/choieujin/lv3-gateway/tree/main/src/main)/[resources](https://github.com/choieujin/lv3-gateway/tree/main/src/main/resources)/application.yml**
+    
+    ![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/081c731f-db5c-43d5-85a5-b4da0827fd13/Untitled.png)
                 
 - app 동작 확인
             
@@ -86,8 +87,8 @@
             
             ![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/fc72539a-8d2f-42d6-92e0-332362f171cf/Untitled.png)
             
-- 분산 메시징 플랫폼 구성
-    - kafka
+## 분산 메시징 플랫폼 구성
+### kafka
     - install
         
         ```bash
