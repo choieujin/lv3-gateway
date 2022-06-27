@@ -269,7 +269,8 @@
             EOF
             
             # default namespace 의 log 들을 수집하도록 설정
-            cat << EOF | kubectl create -f -
+            vi fluent-bit-config.yml
+
             apiVersion: v1
             kind: ConfigMap
             metadata:
@@ -291,7 +292,7 @@
                 @INCLUDE input-kubernetes.conf
                 @INCLUDE filter-kubernetes.conf
                 @INCLUDE output-elasticsearch.conf
-            
+
               input-kubernetes.conf: |
                 [INPUT]
                     Name              tail
@@ -307,7 +308,7 @@
                     Multiline         on
                     Read_from_head    true
                     Parser_Firstline  multiline_pattern
-            
+
               filter-kubernetes.conf: |
                 [FILTER]
                     Name                kubernetes
@@ -326,7 +327,7 @@
                     Match                 default.*
                     multiline.key_content log
                     multiline.parser      java
-            
+
               output-elasticsearch.conf: |
                 [OUTPUT]
                     Name            es
@@ -350,7 +351,7 @@
                     Logstach_Format On
                     Logstach_Prefix fluent-default
                     Retry_Limit     False
-            
+
               parsers.conf: |
                 [PARSER]
                     Name cri
@@ -358,41 +359,38 @@
                     Regex ^(?<time>[^ ]+) (?<stream>stdout|stderr) (?<logtag>[^ ]*) (?<message>.*)$
                     Time_Key    time
                     Time_Format %Y-%m-%dT%H:%M:%S.%L%z
-            
+
                 [PARSER]
                     Name multiline_pattern
                     Format regex
                     Regex   ^\[(?<timestamp>[0-9]{2,4}\-[0-9]{1,2}\-[0-9]{1,2} [0-9]{1,2}\:[0-9]{1,2}\:[0-9]{1,2})\] (?<message>.*)
                     Time_Key    time
                     Time_Format %Y-%m-%
-            EOF
-            
-            cat << EOF | kubectl create -f -
-            apiVersion: apps/v1
-            kind: DaemonSet
-            metadata:
-              name: fluent-bit
-              namespace: elastic
-            	...
-                spec:
-                  containers:
-                  - name: fluent-bit
-                    image: fluent/fluent-bit
-                    imagePullPolicy: Always
-                    volumeMounts:
-                    ...
-                    - name: fluent-bit-config
-                      mountPath: /fluent-bit/etc/
-                  volumes:
-                  ....
-                  - name: fluent-bit-config
-                    configMap:
-                      name: fluent-bit-config
-                  serviceAccountName: fluent-bit
-            EOF
+
+            kubectl create -f fluent-bit-config.yml
+
+
+            # Fluent Bit 설치 스크립트
+            kubectl apply -f https://raw.githubusercontent.com/event-storming/elasticsearch/main/daemonset.yaml
+            # kubectl -n elastic rollout restart  daemonset fluent-bit
+
+            # 설치확인 
+            kubectl get all -n elastic
+            kubectl port-forward -n elastic svc/elasticsearch-master 9200
+            curl http://localhost:9200/_cat/indices
+            # - index 목록 중, 'fluent-default, fluent-k8s'로 시작되는 index가 존재하면 성공
             ```
-            
+            <img width="1792" alt="image" src="https://user-images.githubusercontent.com/20468807/175871493-767bd406-7b7d-42e0-971a-e3ee055a5913.png">
+
 ## 분산 메시징 플랫폼 모니터링
-    - istio ?
-    - 사진
+ - kafka-ui
+```
+helm repo add kafka-ui https://provectus.github.io/kafka-ui
+helm repo update
+helm install kafka-ui kafka-ui/kafka-ui  --namespace=kafka \
+--set envs.config.KAFKA_CLUSTERS_0_NAME=shop-Kafka \
+--set envs.config.KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=my-kafka:9092 \
+--set envs.config.KAFKA_CLUSTERS_0_ZOOKEEPER=my-kafka-zookeeper:2181
+```
+<img width="1792" alt="image" src="https://user-images.githubusercontent.com/20468807/175871260-ea338809-2eed-4673-acdf-8a257494706e.png">
 
