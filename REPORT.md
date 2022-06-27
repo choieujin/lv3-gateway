@@ -385,7 +385,7 @@
             # - index 목록 중, 'fluent-default, fluent-k8s'로 시작되는 index가 존재하면 성공
             ```
             
-            <img width="1792" alt="image" src="https://user-images.githubusercontent.com/20468807/175871493-767bd406-7b7d-42e0-971a-e3ee055a5913.png">
+<img width="1792" alt="image" src="https://user-images.githubusercontent.com/20468807/175871493-767bd406-7b7d-42e0-971a-e3ee055a5913.png">
 
 ## 분산 메시징 플랫폼 모니터링
  - kafka-ui
