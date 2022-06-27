@@ -1,3 +1,7 @@
+<img width="1134" alt="image" src="https://user-images.githubusercontent.com/20468807/175874569-0fb152e1-5dc3-4668-bf3f-8a23845746b3.png">
+
+
+
 ## Cloud Platform 프로비저닝
 ### k8s cluster 구축
             ```
@@ -380,6 +384,7 @@
             curl http://localhost:9200/_cat/indices
             # - index 목록 중, 'fluent-default, fluent-k8s'로 시작되는 index가 존재하면 성공
             ```
+            
             <img width="1792" alt="image" src="https://user-images.githubusercontent.com/20468807/175871493-767bd406-7b7d-42e0-971a-e3ee055a5913.png">
 
 ## 분산 메시징 플랫폼 모니터링
