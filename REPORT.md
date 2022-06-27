@@ -1,6 +1,6 @@
 ## Cloud Platform 프로비저닝
 ### k8s cluster 구축
-            ```jsx
+            ```
             aws configure
             # eks 생성
             eksctl create cluster --name (Cluster-Name) --version 1.21 --nodegroup-name standard-workers --node-type t3.medium --nodes 3 --nodes-min 1 --nodes-max 3
@@ -29,7 +29,7 @@
 - K8S Cluster 에 접근 할 수 있는 권한 부여
   - sa 생성
                     
-                    ```jsx
+                    ```
                     # cluster 에 접근할 수 있도록 serviceaccount 생성 & 권한부여
                     cat <<EOF | kubectl apply -f -
                     apiVersion: v1
@@ -73,7 +73,7 @@
     
 - app 동작 확인
             
-            ```jsx
+            ```
             상품등록 : http POST http://GATEWAY-EXTERNAL-IP:8080/inventories productId=1001 productName=TV stock=100
             주문생성 : http POST http://GATEWAY-EXTERNAL-IP:8080/orders productId=1001 productName=TV qty=5 customerId=100
             주문취소 : http DELETE http://GATEWAY-EXTERNAL-IP:8080/orders/1
@@ -82,7 +82,7 @@
 ### kafka
     - install
         
-        ```bash
+        ```
         helm repo add incubator https://charts.helm.sh/incubator
         helm repo update
         kubectl create namespace kafka
@@ -101,7 +101,7 @@
     - HPA
     - spec.resources.request 추가
         
-        ```bash
+        ```
         # builspec.yaml 에 추가
         
                             resources:
@@ -111,7 +111,7 @@
        
     - code
         
-        ```bash
+        ```
         kubectl autoscale deployment user11-order --cpu-percent=50 --min=1 --max=10
         
         kubectl get hpa
@@ -135,7 +135,7 @@
         kubectl exec -it siege -- /bin/bash
         siege -c30 -t30S 'http://user11-order:8080/orders POST {"productId":"1001","productName":"TV","qty":"5","customerId":"100"}'
         
-        # example output
+        # output
         Lifting the server siege...
         Transactions:                   4095 hits
         Availability:                 100.00 %
@@ -170,7 +170,7 @@
 ## Service Mesh 인프라 구축
     - istio 설치
         
-        ```bash
+        ```
         curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.11.3 TARGET_ARCH=x86_64 sh -
         export PATH=$PWD/bin:$PATH
         istioctl install --set profile=demo -y
@@ -202,7 +202,7 @@
 ## 마이크로서비스 통합 모니터링
     - grafana 설치
         
-        ```bash
+        ```
         cd istio-1.11.3
         kubectl apply -f samples/addons
         kubectl get svc -n istio-system
@@ -214,7 +214,7 @@
     - EFK
         - ElasticSearch, kibana 설치
             
-            ```bash
+            ```
             helm repo add elastic https://helm.elastic.co
             helm repo update
             kubectl create namespace elastic
@@ -231,7 +231,7 @@
             
         - fluentbit 설치
             
-            ```bash
+            ```
             cat << EOF | kubectl create -f -
             apiVersion: v1
             kind: ServiceAccount
