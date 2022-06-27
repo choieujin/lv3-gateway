@@ -1,5 +1,4 @@
-<img width="1134" alt="image" src="https://user-images.githubusercontent.com/20468807/175874569-0fb152e1-5dc3-4668-bf3f-8a23845746b3.png">
-
+<img width="1134" alt="image" src="https://user-images.githubusercontent.com/20468807/175881337-9df71a63-ae8b-4e3c-9e60-6f9a6e484eb8.png">
 
 
 ## Cloud Platform 프로비저닝
@@ -171,6 +170,27 @@
 ## SLA 운영 - 무정지 배포
 - readiness 설정
 - seige 부하발생기 이용하여 재배포 시 100% Availability 나오는지 확인
+            cat <<EOF | kubectl create -f -
+            apiVersion: v1
+            kind: Pod
+            metadata:
+              name: siege
+            spec:
+              containers:
+              - name: siege
+                image: apexacme/siege-nginx
+            EOF
+            # kubectl apply -f siege.yaml
+
+            kubectl exec -it siege -- /bin/bash
+
+            siege -c1 -t180S 'http://user11-order:8080/orders POST {"productId":"1001","productName":"TV","qty":"5","customerId":"100"}'
+
+            kubectl rollout restart deploy user11-order
+
+<img width="1134" alt="image" src="https://user-images.githubusercontent.com/20468807/175881546-21c7bf5c-e739-4b62-84c9-604ed840f4a6.png">
+
+            
 ## Service Mesh 인프라 구축
 - istio 설치
         
