@@ -67,12 +67,10 @@
                         
 - app deploy
   - gateway loadbalancer 설정    
-    ![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/47122d7a-10de-4327-8a22-496d9d90cddb/Untitled.png)
+    ![image](https://user-images.githubusercontent.com/20468807/175861297-a07c149c-5dd3-44c9-b755-b3188323e92b.png)
   - gateway routing svc 경로 확인
-    **[src](https://github.com/choieujin/lv3-gateway/tree/main/src)/[main](https://github.com/choieujin/lv3-gateway/tree/main/src/main)/[resources](https://github.com/choieujin/lv3-gateway/tree/main/src/main/resources)/application.yml**
+    ![image](https://user-images.githubusercontent.com/20468807/175861331-61944ff9-34a5-460c-9853-b6e1e87b7f2c.png)
     
-    ![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/081c731f-db5c-43d5-85a5-b4da0827fd13/Untitled.png)
-                
 - app 동작 확인
             
             ```jsx
@@ -80,13 +78,6 @@
             주문생성 : http POST http://GATEWAY-EXTERNAL-IP:8080/orders productId=1001 productName=TV qty=5 customerId=100
             주문취소 : http DELETE http://GATEWAY-EXTERNAL-IP:8080/orders/1
             ```
-            
-            ![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/4058ef70-bd3f-4e97-8381-bc730b73dffd/Untitled.png)
-            
-            ![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/bd35c08c-8444-4b84-952c-7d9fe2503d80/Untitled.png)
-            
-            ![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/fc72539a-8d2f-42d6-92e0-332362f171cf/Untitled.png)
-            
 ## 분산 메시징 플랫폼 구성
 ### kafka
     - install
@@ -103,39 +94,30 @@
         kubectl -n kafka exec -ti my-kafka-0 -- /usr/bin/kafka-console-consumer --bootstrap-server my-kafka:9092 --topic mall --from-beginning
         # 모니터링 해두고 app 에 HTTP 를 쏴서 동작 확인
         ```
-        
-        ![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/cdcc86b4-e986-4bad-98b2-104bd810a377/Untitled.png)
-        
+       
+       ![image](https://user-images.githubusercontent.com/20468807/175861384-af3a5120-90bf-4d62-a00f-59f0797c63c3.png)
+
 ## SLA 운영 - Auto Scale-out
     - HPA
     - spec.resources.request 추가
         
         ```bash
-        # 모든 프로젝트 builspec.yaml 에 추가
+        # builspec.yaml 에 추가
         
                             resources:
                               requests:
-                                memory: "64Mi"
-                                cpu: "250m"
+                                cpu: "200m"
         ```
-        
-        ![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/bdacb659-5964-4ac5-a195-34b1efe1002f/Untitled.png)
-        
+       
     - code
         
         ```bash
-        kubectl autoscale deployment user11-delivery --cpu-percent=50 --min=1 --max=10
-        kubectl autoscale deployment user11-gateway --cpu-percent=50 --min=1 --max=10
         kubectl autoscale deployment user11-order --cpu-percent=50 --min=1 --max=10
-        kubectl autoscale deployment user11-product --cpu-percent=50 --min=1 --max=10
         
         kubectl get hpa
         # output
         NAME              REFERENCE                    TARGETS   MINPODS   MAXPODS   REPLICAS   AGE
-        user11-delivery   Deployment/user11-delivery   3%/50%    1         10        1          42m
-        user11-gateway    Deployment/user11-gateway    1%/50%    1         10        10         42m
         user11-order      Deployment/user11-order      4%/50%    1         10        8          42m
-        user11-product    Deployment/user11-product    2%/50%    1         10        1          42m
         
         # 부하발생 pod 
         cat <<EOF | kubectl create -f -
@@ -151,9 +133,7 @@
         # kubectl apply -f siege.yaml
         
         kubectl exec -it siege -- /bin/bash
-        siege
-        siege -c30 -t30S -v http://php-apache
-        siege -c30 -t30S 'http://GATEWAY-EXTERNAL-IP:8080/orders POST {"productId":"1001","productName":"TV","qty":"5","customerId":"100"}'
+        siege -c30 -t30S 'http://user11-order:8080/orders POST {"productId":"1001","productName":"TV","qty":"5","customerId":"100"}'
         
         # example output
         Lifting the server siege...
@@ -176,12 +156,7 @@
         NAME                               READY   STATUS    RESTARTS   AGE
         siege                              1/1     Running   0          48m
         user11-delivery-5f5ddfc4f8-zfd6p   1/1     Running   0          10m
-        user11-gateway-968f6867b-2b4hd     1/1     Running   0          108s
-        user11-gateway-968f6867b-478mn     1/1     Running   0          2m33s
         user11-gateway-968f6867b-4xn4n     1/1     Running   0          27m
-        user11-gateway-968f6867b-scd7x     1/1     Running   0          108s
-        user11-gateway-968f6867b-x4cxv     1/1     Running   0          108s
-        user11-gateway-968f6867b-xxjwr     1/1     Running   0          6m34s
         user11-order-7b4b4578c-5mzb5       1/1     Running   0          93s
         user11-order-7b4b4578c-6tgjv       0/1     Pending   0          78s
         user11-order-7b4b4578c-82tvg       1/1     Running   0          78s
@@ -210,6 +185,12 @@
         kubectl label namespace default istio-injection=enabled
         
         # 해당 namespace 서비스들 재배포 & sidecar 로 proxy container 붙은 것 확인.
+        kubectl get pod
+            NAME                               READY   STATUS    RESTARTS   AGE
+            user11-delivery-867758f954-kf6mt   2/2     Running   11         141m
+            user11-gateway-ccbc4444c-xzwhf     2/2     Running   1          134m
+            user11-order-7994c7d745-49n6w      2/2     Running   0          104s
+            user11-product-6cb6f59bbf-gd4mq    2/2     Running   10         54m
         ```
         
 ## Service Mesh 기반 마이크로서비스 Resilience 적용
