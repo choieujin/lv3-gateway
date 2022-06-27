@@ -84,7 +84,7 @@
             ```
 ## 분산 메시징 플랫폼 구성
 ### kafka
-    - install
+  - install
         
         ```
         helm repo add incubator https://charts.helm.sh/incubator
@@ -99,11 +99,11 @@
         # 모니터링 해두고 app 에 HTTP 를 쏴서 동작 확인
         ```
        
-       ![image](https://user-images.githubusercontent.com/20468807/175861384-af3a5120-90bf-4d62-a00f-59f0797c63c3.png)
+![image](https://user-images.githubusercontent.com/20468807/175861384-af3a5120-90bf-4d62-a00f-59f0797c63c3.png)
 
 ## SLA 운영 - Auto Scale-out
-    - HPA
-    - spec.resources.request 추가
+- HPA
+  - spec.resources.request 추가
         
         ```
         # builspec.yaml 에 추가
@@ -113,7 +113,7 @@
                                 cpu: "200m"
         ```
        
-    - code
+  - code
         
         ```
         kubectl autoscale deployment user11-order --cpu-percent=50 --min=1 --max=10
@@ -169,10 +169,10 @@
         ```
         
 ## SLA 운영 - 무정지 배포
-    - readiness 설정
-    - seige 부하발생기 이용하여 재배포 시 100% Availability 나오는지 확인
+- readiness 설정
+- seige 부하발생기 이용하여 재배포 시 100% Availability 나오는지 확인
 ## Service Mesh 인프라 구축
-    - istio 설치
+- istio 설치
         
         ```
         curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.11.3 TARGET_ARCH=x86_64 sh -
@@ -198,13 +198,11 @@
         ```
         
 ## Service Mesh 기반 마이크로서비스 Resilience 적용
-    - istio 설정
-        - 사진
-            
-            ![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/c155915d-530e-4a25-b423-f9f11b9349ee/Untitled.png)
+
+
             
 ## 마이크로서비스 통합 모니터링
-    - grafana 설치
+- grafana 설치
         
         ```
         cd istio-1.11.3
@@ -215,8 +213,8 @@
 <img width="1734" alt="image" src="https://user-images.githubusercontent.com/20468807/175860131-9dfcd6ff-d937-4f00-bebe-2b42a5077108.png">
 
 ## 마이크로서비스 통합 로깅
-    - EFK
-        - ElasticSearch, kibana 설치
+- EFK
+  - ElasticSearch, kibana 설치
             
             ```
             helm repo add elastic https://helm.elastic.co
@@ -233,7 +231,7 @@
             curl http://localhost:9200/_cat/indices
             ```
             
-        - fluentbit 설치
+  - fluentbit 설치
             
             ```
             cat << EOF | kubectl create -f -
