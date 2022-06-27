@@ -1,140 +1,33 @@
 ## Cloud Platform 프로비저닝
-    - k8s cluster 구축
-        - cmds
-            
+### k8s cluster 구축
             ```jsx
             aws configure
+            # eks 생성
             eksctl create cluster --name (Cluster-Name) --version 1.21 --nodegroup-name standard-workers --node-type t3.medium --nodes 3 --nodes-min 1 --nodes-max 3
             aws eks --region (Region-Code) update-kubeconfig --name (Cluster-Name)
             kubectl get all
             kubectl config current-context
-            aws ecr create-repository --repository-name (User-Account) --image-scanning-configuration scanOnPush=true --region (Region-Code)
             
-            # ex
-            # aws ecr create-repository --repository-name user11-product --image-scanning-configuration scanOnPush=true --region ap-northeast-1
-            # aws ecr create-repository --repository-name user11-delivery --image-scanning-configuration scanOnPush=true --region ap-northeast-1
-            # aws ecr create-repository --repository-name user11-order --image-scanning-configuration scanOnPush=true --region ap-northeast-1
-            # aws ecr create-repository --repository-name user11-gateway --image-scanning-configuration scanOnPush=true --region ap-northeast-1
+            # image repository 생성
+            aws ecr create-repository --repository-name user11-product --image-scanning-configuration scanOnPush=true --region ap-northeast-1
+            aws ecr create-repository --repository-name user11-delivery --image-scanning-configuration scanOnPush=true --region ap-northeast-1
+            aws ecr create-repository --repository-name user11-order --image-scanning-configuration scanOnPush=true --region ap-northeast-1
+            aws ecr create-repository --repository-name user11-gateway --image-scanning-configuration scanOnPush=true --region ap-northeast-1
             
-            aws ecr list-images --repository-name (User-Account)
-            docker login --username AWS -p $(aws ecr get-login-password --region (Region-Code)) (Account-Id).dkr.ecr.(Region-Code).amazonaws.com/
+            # image registr login
+            docker login --username AWS -p $(aws ecr get-login-password --region ap-northeast-1) (Account-Id).dkr.ecr.ap-northeast-1.amazonaws.com/
             
-            # metric-server
+            # metric-server 설치
             kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
             ```
             
 ## DevOps Toolchain 구축
-    - pipeline 구축
-        - aws codeBuild 사용
-            - project 에 buildspec.yml 없으므로 기존 project 에서 가져다가 사용.
-                - code
-                    
-                    ```jsx
-                    # buildspec.yaml
-                    
-                    version: 0.2
-                    
-                    env:
-                      variables:
-                        _PROJECT_NAME: "user11-products"   ## container repository 이름
-                    
-                    phases:
-                      install:
-                        runtime-versions:
-                          java: corretto8
-                          docker: 18
-                        commands:
-                          - echo install kubectl
-                          - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
-                          - chmod +x ./kubectl
-                          - mv ./kubectl /usr/local/bin/kubectl
-                      pre_build:
-                        commands:
-                          - echo Logging in to Amazon ECR...
-                          - echo $_PROJECT_NAME
-                          - echo $AWS_ACCOUNT_ID
-                          - echo $AWS_DEFAULT_REGION
-                          - echo $CODEBUILD_RESOLVED_SOURCE_VERSION
-                          - echo start command
-                          - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
-                      build:
-                        commands:
-                          - echo Build started on `date`
-                          - echo Building the Docker image...
-                          - mvn package -Dmaven.test.skip=true
-                          - docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$_PROJECT_NAME:$CODEBUILD_RESOLVED_SOURCE_VERSION  .
-                      post_build:
-                        commands:
-                          - echo Pushing the Docker image...
-                          - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$_PROJECT_NAME:$CODEBUILD_RESOLVED_SOURCE_VERSION
-                          - echo connect kubectl
-                          - kubectl config set-cluster k8s --server="$KUBE_URL" --insecure-skip-tls-verify=true
-                          - kubectl config set-credentials admin --token="$KUBE_TOKEN"
-                          - kubectl config set-context default --cluster=k8s --user=admin
-                          - kubectl config use-context default
-                          - |
-                              cat <<EOF | kubectl apply -f -
-                              apiVersion: v1
-                              kind: Service
-                              metadata:
-                                name: $_PROJECT_NAME
-                                labels:
-                                  app: $_PROJECT_NAME
-                              spec:
-                                ports:
-                                  - port: 8080
-                                    targetPort: 8080
-                                selector:
-                                  app: $_PROJECT_NAME
-                              EOF
-                          - |
-                              cat  <<EOF | kubectl apply -f -
-                              apiVersion: apps/v1
-                              kind: Deployment
-                              metadata:
-                                name: $_PROJECT_NAME
-                                labels:
-                                  app: $_PROJECT_NAME
-                              spec:
-                                replicas: 1
-                                selector:
-                                  matchLabels:
-                                    app: $_PROJECT_NAME
-                                template:
-                                  metadata:
-                                    labels:
-                                      app: $_PROJECT_NAME
-                                  spec:
-                                    containers:
-                                      - name: $_PROJECT_NAME
-                                        image: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$_PROJECT_NAME:$CODEBUILD_RESOLVED_SOURCE_VERSION
-                                        ports:
-                                          - containerPort: 8080
-                                        readinessProbe:
-                                          httpGet:
-                                            path: /actuator/health
-                                            port: 8080
-                                          initialDelaySeconds: 10
-                                          timeoutSeconds: 2
-                                          periodSeconds: 5
-                                          failureThreshold: 10
-                                        livenessProbe:
-                                          httpGet:
-                                            path: /actuator/health
-                                            port: 8080
-                                          initialDelaySeconds: 120
-                                          timeoutSeconds: 2
-                                          periodSeconds: 5
-                                          failureThreshold: 5
-                              EOF
-                    
-                    #cache:
-                    #  paths:
-                    #    - '/root/.m2/**/*'
-                    ```
-                    
-            - K8S Cluster 에 접근 할 수 있는 권한 부여
-                - 권한 부여 방법
+### pipeline 구축
+- aws codeBuild 사용하여 pipeline 구성
+<img width="1792" alt="image" src="https://user-images.githubusercontent.com/20468807/175860918-0014388e-4030-427b-9345-5ded4453761c.png">
+
+- K8S Cluster 에 접근 할 수 있는 권한 부여
+  - sa 생성
                     
                     ```jsx
                     # cluster 에 접근할 수 있도록 serviceaccount 생성 & 권한부여
@@ -170,50 +63,16 @@
                       CoreDNS is running at https://xxxxxx.gr7.ap-northeast-1.eks.amazonaws.com/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
                     # https://xxxxxxxx.gr7.ap-northeast-1.eks.amazonaws.com 값을 codebuild 의 환경변수에 저장 KUBE_URL
                     ```
-                    
-            - error
-                1. mvn 실패
-                    
-                    ![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/d6c24daa-a205-4da5-bc1b-b9cbb5506aea/Untitled.png)
-                    
-                    발생 시 buildspec.yml 의 `java: corretto8` → `java: corretto11`
-                    
-                2. ecr login 실패
-                    
-                    ![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/d7fea609-9325-4d79-b153-ac0643a451ff/Untitled.png)
-                    
-                    - 발생 시 iam 에 권한추가 필요
+                   
                         
-                        ![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/8ec0a966-851f-4d80-8da7-58c1735c93e3/Untitled.png)
-                        
-                        ```jsx
-                        {
-                              "Action": [
-                                "ecr:BatchCheckLayerAvailability",
-                                "ecr:CompleteLayerUpload",
-                                "ecr:GetAuthorizationToken",
-                                "ecr:InitiateLayerUpload",
-                                "ecr:PutImage",
-                                "ecr:UploadLayerPart"
-                              ],
-                              "Resource": "*",
-                              "Effect": "Allow"
-                         }
-                        ```
-                        
-    - app deploy
-        - msa project 4개 deploy & pipeline 구축 (개인 git 에 clone 한 뒤 진행)
-            - gateway loadbalancer 설정
-                
+- app deploy
+            - gateway loadbalancer 설정    
                 ![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/47122d7a-10de-4327-8a22-496d9d90cddb/Untitled.png)
-                
             - gateway routing svc 경로 확인
-                
                 **[src](https://github.com/choieujin/lv3-gateway/tree/main/src)/[main](https://github.com/choieujin/lv3-gateway/tree/main/src/main)/[resources](https://github.com/choieujin/lv3-gateway/tree/main/src/main/resources)/application.yml**
-                
                 ![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/081c731f-db5c-43d5-85a5-b4da0827fd13/Untitled.png)
                 
-        - app 동작 확인
+- app 동작 확인
             
             ```jsx
             상품등록 : http POST http://GATEWAY-EXTERNAL-IP:8080/inventories productId=1001 productName=TV stock=100
