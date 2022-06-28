@@ -218,9 +218,6 @@
             user11-order-7994c7d745-49n6w      2/2     Running   0          104s
             user11-product-6cb6f59bbf-gd4mq    2/2     Running   10         54m
         ```
-        
-## Service Mesh 기반 마이크로서비스 Resilience 적용
-
 
             
 ## 마이크로서비스 통합 모니터링
