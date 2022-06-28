@@ -170,6 +170,7 @@
 ## SLA 운영 - 무정지 배포
 - readiness 설정
 - seige 부하발생기 이용하여 재배포 시 100% Availability 나오는지 확인
+
             ```
             cat <<EOF | kubectl create -f -
             apiVersion: v1
