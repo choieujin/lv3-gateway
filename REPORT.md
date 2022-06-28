@@ -228,7 +228,8 @@
         kubectl apply -f samples/addons
         kubectl get svc -n istio-system
         ```
-        
+
+<img width="939" alt="image" src="https://user-images.githubusercontent.com/20468807/176066780-25571858-fee7-42c3-9b7f-94aaa07b4221.png">        
 <img width="1734" alt="image" src="https://user-images.githubusercontent.com/20468807/175860131-9dfcd6ff-d937-4f00-bebe-2b42a5077108.png">
 
 ## 마이크로서비스 통합 로깅
