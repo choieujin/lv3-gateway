@@ -170,6 +170,7 @@
 ## SLA 운영 - 무정지 배포
 - readiness 설정
 - seige 부하발생기 이용하여 재배포 시 100% Availability 나오는지 확인
+            ```
             cat <<EOF | kubectl create -f -
             apiVersion: v1
             kind: Pod
@@ -187,7 +188,7 @@
             siege -c1 -t180S 'http://user11-order:8080/orders POST {"productId":"1001","productName":"TV","qty":"5","customerId":"100"}'
 
             kubectl rollout restart deploy user11-order
-
+            ```
 <img width="1134" alt="image" src="https://user-images.githubusercontent.com/20468807/175881546-21c7bf5c-e739-4b62-84c9-604ed840f4a6.png">
 
             
